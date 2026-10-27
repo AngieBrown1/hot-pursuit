@@ -107,10 +107,10 @@ class Player {
         bn::size size; // The width and height of the sprite
         bn::rect bounding_box;
 
-        Player(bn::fixed x_start, bn::fixed y_start, bn::rect player_rect):
+        Player(bn::fixed x_start, bn::fixed y_start, bn::fixed player_speed, bn::size player_size):
         sprite(bn::sprite_items::dot.create_sprite(x_start, y_start)), 
-        speed(speed), 
-        bounding_box(player_rect)  {
+        speed(player_speed), 
+        bounding_box(create_bounding_box(sprite, player_size))  {
 
         }
         /**
@@ -140,13 +140,7 @@ int main() {
 
     // Create a player and initialize it
     // TODO: we will move the initialization logic to a constructor.
-    bn::rect player_hitbox = create_bounding_box(player.sprite, player.size);
-
-    Player player = Player(44, 22, player_hitbox);
-    player.sprite.set_x(44);
-    player.sprite.set_y(22);
-    player.speed = 1.5;
-    player.size = PLAYER_SIZE;
+    Player player = Player(44, 22, 1.5, PLAYER_SIZE);
     
 
     bn::sprite_ptr enemy_sprite = bn::sprite_items::square.create_sprite(-30, 22);

@@ -12,6 +12,7 @@
 #include "bn_sprite_items_square.h"
 
 // Width and height of the the player bounding box
+static constexpr bn::fixed BASE_SPEED = 2; 
 static constexpr bn::size PLAYER_SIZE = {8, 8};
 static constexpr bn::size ENEMY_SIZE = {8, 8};
 
@@ -100,6 +101,17 @@ class ScoreDisplay {
 
 class Player {
     public:
+
+        bn::sprite_ptr sprite; 
+        bn::fixed x_speed; 
+        bn::fixed y_speed; 
+
+        Player(bn::fixed x_start, bn::fixed y_start):
+        sprite(bn::sprite_items::dot.create_sprite(x_start, y_start)), 
+        x_speed(BASE_SPEED), 
+        y_speed(BASE_SPEED),  {
+
+        }
         /**
          * Update the position and bounding box of the player based on d-pad movement.
          */
@@ -130,7 +142,7 @@ int main() {
 
     // Create a player and initialize it
     // TODO: we will move the initialization logic to a constructor.
-    Player player = Player();
+    Player player = Player(44, 22);
     player.sprite.set_x(44);
     player.sprite.set_y(22);
     player.speed = 1.5;

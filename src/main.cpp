@@ -164,21 +164,21 @@ class Player {
 };
 class Enemy {
     public:
-        bn::sprite_ptr enemy_sprite = bn::sprite_items::dot.create_sprite(); 
+        bn::sprite_ptr sprite = bn::sprite_items::dot.create_sprite(); 
         bn::size size; 
-        bn::rect enemy_bounding_box;
-        bn::fixed enemy_speed = 2;
+        bn::rect bounding_box;
+        bn::fixed enemy_speed = 1;
 
         Enemy(bn::fixed x_start, bn::fixed y_start, bn::size enemy_size):
-        enemy_sprite(bn::sprite_items::square.create_sprite(x_start, y_start)),
-        enemy_bounding_box(create_bounding_box(enemy_sprite, enemy_size)) {
+        sprite(bn::sprite_items::square.create_sprite(x_start, y_start)),
+        bounding_box(create_bounding_box(sprite, enemy_size)) {
 
         }
 
         //start of logic for enemy chase        
         int get_distance(const Player& player) const {
-            int dx = bn::abs(player.get_x() - enemy_sprite.x()).round_integer();
-            int dy = bn::abs(player.get_y() - enemy_sprite.y()).round_integer();
+            int dx = bn::abs(player.get_x() - sprite.x()).round_integer();
+            int dy = bn::abs(player.get_y() - sprite.y()).round_integer();
 
             int max_dist = std::max(dx, dy); 
             int min_dist = std::min(dx, dy); 
@@ -197,16 +197,16 @@ class Enemy {
             int dist_to_player = get_distance(player); 
             //the part that broke
             if(dist_to_player > 0){
-                if (player.get_x() > enemy_sprite.x()) { move_x += enemy_speed; }
-                if (player.get_x() < enemy_sprite.x()) { move_x -= enemy_speed; }
-                if (player.get_y() > enemy_sprite.y()) { move_y += enemy_speed; }
-                if (player.get_y() < enemy_sprite.y()) { move_y -= enemy_speed; }
+                if (player.get_x() > sprite.x()) { move_x += enemy_speed; }
+                if (player.get_x() < sprite.x()) { move_x -= enemy_speed; }
+                if (player.get_y() > sprite.y()) { move_y += enemy_speed; }
+                if (player.get_y() < sprite.y()) { move_y -= enemy_speed; }
             }
-        enemy_sprite.set_x(enemy_sprite.x() + move_x);
-        enemy_sprite.set_y(enemy_sprite.y() + move_y);
+        sprite.set_x(sprite.x() + move_x);
+        sprite.set_y(sprite.y() + move_y);
 
             //trying to update enemy bounding box
-        enemy_bounding_box = create_bounding_box(enemy_sprite, ENEMY_SIZE);
+        bounding_box = create_bounding_box(sprite, ENEMY_SIZE);
         }
 
 
@@ -224,25 +224,21 @@ int main() {
     // TODO: we will move the initialization logic to a constructor.
     Player player = Player(44, 22, 1.5, PLAYER_SIZE);
     Enemy enemy = Enemy(0, 22, ENEMY_SIZE); 
-    
-
-    bn::sprite_ptr enemy_sprite = bn::sprite_items::square.create_sprite(-30, 22);
-    bn::rect enemy_bounding_box = create_bounding_box(enemy_sprite, ENEMY_SIZE);
 
     while(true) {
         player.update();
         enemy.update(player);
 
         // Reset the current score and player position if the player collides with enemy
-        if(enemy_bounding_box.intersects(player.bounding_box)) {
+        if(enemy.bounding_box.intersects(player.bounding_box)) {
             scoreDisplay.resetScore();
             player.sprite.set_x(44);
             player.sprite.set_y(22);
 
             int new_x = rng.get_int(MIN_X, MAX_X);
             int new_y = rng.get_int(MIN_Y, MAX_Y);
-            enemy.enemy_sprite.set_x(new_x);
-            enemy.enemy_sprite.set_y(new_y);
+            enemy.sprite.set_x(new_x);
+            enemy.sprite.set_y(new_y);
         }
 
         // Update the scores and disaply them

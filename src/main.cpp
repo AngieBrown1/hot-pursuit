@@ -106,6 +106,8 @@ class Player {
         bn::fixed speed; // The speed of the player
         bn::size size; // The width and height of the sprite
         bn::rect bounding_box;
+        bn::fixed x_speed;
+        bn::fixed y_speed;
 
         Player(bn::fixed x_start, bn::fixed y_start, bn::fixed player_speed, bn::size player_size):
         sprite(bn::sprite_items::dot.create_sprite(x_start, y_start)), 
@@ -117,6 +119,9 @@ class Player {
          * Update the position and bounding box of the player based on d-pad movement.
          */
         void update() {
+            bn::fixed x = sprite.x();
+            bn::fixed y = sprite.y();
+
             if(bn::keypad::right_held()) {
                 sprite.set_x(sprite.x() + speed);
             }
@@ -129,6 +134,22 @@ class Player {
             }
             if(bn::keypad::down_held()) {
                 sprite.set_y(sprite.y() + speed);
+            }
+
+             if(sprite.x() > MAX_X) {
+                sprite.set_x(MAX_X);
+            }
+
+            if(x < MIN_X){
+                sprite.set_x(MIN_X);
+            }
+
+            if(y > MAX_Y) {
+                sprite.set_y(MAX_Y);
+            }
+
+            if(y < MIN_Y){
+                sprite.set_y(MIN_Y);
             }
 
             bounding_box = create_bounding_box(sprite, size);

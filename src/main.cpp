@@ -175,18 +175,18 @@ class Enemy {
 
         }
 
-    //start of logic for enemy chase        
-    int get_distance(const Player& player) const {
-        int dx = (player.get_x() - enemy_sprite.x()).round_integer();
-        int dy = (player.get_y() - enemy_sprite.y()).round_integer();
+        //start of logic for enemy chase        
+        int get_distance(const Player& player) const {
+            int dx = bn::abs(player.get_x() - enemy_sprite.x()).round_integer();
+            int dy = bn::abs(player.get_y() - enemy_sprite.y()).round_integer();
 
-        int max_dist = std::max(dx, dy); 
-        int min_dist = std::min(dx, dy); 
+            int max_dist = std::max(dx, dy); 
+            int min_dist = std::min(dx, dy); 
 
-        int dist = max_dist + (min_dist >> 2);
+            int dist = max_dist + (min_dist >> 2);
 
-        return dist; 
-    }
+            return dist; 
+        }
 
   
 

@@ -136,18 +136,57 @@ class Player {
 
         // Create the sprite. This will be moved to a constructor
          // The rectangle around the sprite for checking collision
+
+    bn::fixed get_x() const { return sprite.x(); }
+    bn::fixed get_y() const { return sprite.y(); } 
 };
 class Enemy {
     public:
-        bn::sprite_ptr sprite = bn::sprite_items::dot.create_sprite(); 
+        bn::sprite_ptr enemy_sprite = bn::sprite_items::dot.create_sprite(); 
         bn::size size; 
-        bn::rect bounding_box;
+        bn::rect enemy_bounding_box;
+        bn::fixed enemy_speed = 2;
 
         Enemy(bn::fixed x_start, bn::fixed y_start, bn::size enemy_size):
-        sprite(bn::sprite_items::square.create_sprite(x_start, y_start)), 
-        bounding_box(create_bounding_box(sprite, enemy_size)) {
+        enemy_sprite(bn::sprite_items::square.create_sprite(x_start, y_start)),
+        enemy_bounding_box(create_bounding_box(enemy_sprite, enemy_size)) {
 
         }
+
+        
+    int get_distance(const Player& player) const {
+        int dx = (player.get_x() - enemy_sprite.x()).round_integer();
+        int dy = (player.get_y() - enemy_sprite.y()).round_integer();
+
+        int max_dist = std::max(dx, dy); 
+        int min_dist = std::min(dx, dy); 
+
+        int dist = max_dist + (min_dist >> 2);
+
+        return dist; 
+    }
+
+  
+
+        void update(Player& player){
+        bn::fixed move_x = 0;
+        bn::fixed move_y = 0; 
+
+            int dist_to_player = get_distance(player); 
+
+            if(dist_to_player > 0){
+                if (player.get_x() > enemy_sprite.x()) { move_x += enemy_speed; }
+                if (player.get_x() < enemy_sprite.x()) { move_x -= enemy_speed; }
+                if (player.get_y() > enemy_sprite.y()) { move_y += enemy_speed; }
+                if (player.get_y() < enemy_sprite.y()) { move_y -= enemy_speed; }
+            }
+        enemy_sprite.set_x(enemy_sprite.x() + move_x);
+        enemy_sprite.set_y(enemy_sprite.y() + move_y);
+        
+        enemy_bounding_box = create_bounding_box(enemy_sprite, ENEMY_SIZE);
+        }
+
+
 };
 
 int main() {
@@ -167,6 +206,7 @@ int main() {
 
     while(true) {
         player.update();
+        enemy.update(player);
 
         // Reset the current score and player position if the player collides with enemy
         if(enemy_bounding_box.intersects(player.bounding_box)) {

@@ -6,6 +6,7 @@
 #include <bn_string.h>
 #include <bn_sprite_ptr.h>
 #include <bn_sprite_text_generator.h>
+#include <bn_random.h>
 
 #include "common_fixed_8x16_font.h"
 #include "bn_sprite_items_dot.h"
@@ -214,6 +215,8 @@ class Enemy {
 int main() {
     bn::core::init();
 
+    bn::random rng = bn::random();
+
     // Create a new score display
     ScoreDisplay scoreDisplay = ScoreDisplay();
 
@@ -235,6 +238,11 @@ int main() {
             scoreDisplay.resetScore();
             player.sprite.set_x(44);
             player.sprite.set_y(22);
+
+            int new_x = rng.get_int(MIN_X, MAX_X);
+            int new_y = rng.get_int(MIN_Y, MAX_Y);
+            enemy.enemy_sprite.set_x(new_x);
+            enemy.enemy_sprite.set_y(new_y);
         }
 
         // Update the scores and disaply them

@@ -153,7 +153,7 @@ class Enemy {
 
         }
 
-        
+    //start of logic for enemy chase        
     int get_distance(const Player& player) const {
         int dx = (player.get_x() - enemy_sprite.x()).round_integer();
         int dy = (player.get_y() - enemy_sprite.y()).round_integer();
@@ -173,7 +173,7 @@ class Enemy {
         bn::fixed move_y = 0; 
 
             int dist_to_player = get_distance(player); 
-
+            //the part that broke
             if(dist_to_player > 0){
                 if (player.get_x() > enemy_sprite.x()) { move_x += enemy_speed; }
                 if (player.get_x() < enemy_sprite.x()) { move_x -= enemy_speed; }
@@ -182,7 +182,8 @@ class Enemy {
             }
         enemy_sprite.set_x(enemy_sprite.x() + move_x);
         enemy_sprite.set_y(enemy_sprite.y() + move_y);
-        
+
+            //trying to update enemy bounding box
         enemy_bounding_box = create_bounding_box(enemy_sprite, ENEMY_SIZE);
         }
 

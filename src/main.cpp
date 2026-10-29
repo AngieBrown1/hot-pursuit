@@ -8,6 +8,7 @@
 #include <bn_sprite_text_generator.h>
 #include <bn_random.h>
 
+
 #include "common_fixed_8x16_font.h"
 #include "bn_sprite_items_dot.h"
 #include "bn_sprite_items_square.h"

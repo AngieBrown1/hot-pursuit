@@ -33,6 +33,10 @@ static constexpr int SCORE_Y = -70;
 static constexpr int HIGH_SCORE_X = -70;
 static constexpr int HIGH_SCORE_Y = -70;
 
+// Max Enemy Count
+static constexpr int ENEMY_START_COUNT = 5;
+static constexpr int MAX_ENEMY_COUNT = 10;
+
 /**
  * Creates a rectangle centered at a sprite's location with a given size.
  * sprite the sprite to center the box around
@@ -103,17 +107,15 @@ class ScoreDisplay {
 class Player {
     public:
 
-        bn::sprite_ptr sprite = bn::sprite_items::dot.create_sprite();
+        bn::sprite_ptr sprite;
         bn::fixed speed; // The speed of the player
-        bn::size size; // The width and height of the sprite
         bn::rect bounding_box;
-        bn::fixed x_speed;
-        bn::fixed y_speed;
+        bn::size size; 
 
         Player(bn::fixed x_start, bn::fixed y_start, bn::fixed player_speed, bn::size player_size):
         sprite(bn::sprite_items::dot.create_sprite(x_start, y_start)), 
-        speed(player_speed), 
-        bounding_box(create_bounding_box(sprite, player_size))  {
+        speed(player_speed),
+        size(player_size) {
 
         }
         /**
@@ -156,24 +158,28 @@ class Player {
             bounding_box = create_bounding_box(sprite, size);
         }
 
+        void reset(bn::fixed start_x, bn::fixed start_y) {
+            sprite.set_x(start_x); 
+            sprite.set_y(start_y); 
+        }
+
         // Create the sprite. This will be moved to a constructor
          // The rectangle around the sprite for checking collision
 
     bn::fixed get_x() const { return sprite.x(); }
     bn::fixed get_y() const { return sprite.y(); } 
 };
+
 class Enemy {
     public:
-        bn::sprite_ptr sprite = bn::sprite_items::dot.create_sprite(); 
-        bn::size size; 
+        bn::sprite_ptr sprite; 
         bn::rect bounding_box;
         bn::fixed enemy_speed = 1;
+        bn::size size; 
 
         Enemy(bn::fixed x_start, bn::fixed y_start, bn::size enemy_size):
         sprite(bn::sprite_items::square.create_sprite(x_start, y_start)),
-        bounding_box(create_bounding_box(sprite, enemy_size)) {
-
-        }
+        size(enemy_size) {}
 
         //start of logic for enemy chase        
         int get_distance(const Player& player) const {
@@ -190,9 +196,9 @@ class Enemy {
 
   
 
-        void update(Player& player){
-        bn::fixed move_x = 0;
-        bn::fixed move_y = 0; 
+        bool update(Player& player){
+            bn::fixed move_x = 0;
+            bn::fixed move_y = 0; 
 
             int dist_to_player = get_distance(player); 
             //the part that broke
@@ -202,49 +208,91 @@ class Enemy {
                 if (player.get_y() > sprite.y()) { move_y += enemy_speed; }
                 if (player.get_y() < sprite.y()) { move_y -= enemy_speed; }
             }
-        sprite.set_x(sprite.x() + move_x);
-        sprite.set_y(sprite.y() + move_y);
+            sprite.set_x(sprite.x() + move_x);
+            sprite.set_y(sprite.y() + move_y);
 
             //trying to update enemy bounding box
-        bounding_box = create_bounding_box(sprite, ENEMY_SIZE);
+            bounding_box = create_bounding_box(sprite, size);
+
+            return bounding_box.intersects(player.bounding_box); 
         }
 
-
+        void reset(bn::fixed start_x, bn::fixed start_y) {
+            sprite.set_x(start_x); 
+            sprite.set_y(start_y); 
+        }
 };
+
+void addEnemy(bn::vector<Enemy, MAX_ENEMY_COUNT>& enemies, bn::fixed start_x, bn::fixed start_y) {
+    if (enemies.size() < enemies.max_size()) {
+        enemies.push_back(Enemy(start_x, start_y, ENEMY_SIZE));
+    }
+}
+
+void initializeGame(bn::vector<Enemy, MAX_ENEMY_COUNT>& enemies, int enemy_start, bn::random& random_generator) {
+    bn::fixed box_left = -30;
+    bn::fixed box_right = 30;
+    bn::fixed box_top = -20;
+    bn::fixed box_bottom = 20;
+
+    enemies.clear(); 
+
+    for (int i = 0; i < enemy_start; i++) {
+        bn::fixed random_x{0}; 
+        bn::fixed random_y{0};
+        bool inside_box = true; 
+
+        while (inside_box) {
+            random_x = (random_generator.get_fixed() * MAX_X * 2) - MAX_X;
+            random_y = (random_generator.get_fixed() * MAX_Y * 2) - MAX_Y;
+            
+            if (random_x >= box_left && random_x <= box_right && 
+                random_y >= box_top && random_y <= box_bottom) {
+                inside_box = true; 
+            } else {
+                inside_box = false; 
+            }
+        }
+
+        addEnemy(enemies, random_x, random_y); 
+    }
+}
 
 int main() {
     bn::core::init();
 
     bn::random rng = bn::random();
+    bn::vector<Enemy, MAX_ENEMY_COUNT> enemyVector = {}; 
 
     // Create a new score display
     ScoreDisplay scoreDisplay = ScoreDisplay();
 
     // Create a player and initialize it
     // TODO: we will move the initialization logic to a constructor.
-    Player player = Player(44, 22, 1.5, PLAYER_SIZE);
-    Enemy enemy = Enemy(0, 22, ENEMY_SIZE); 
+    Player player = Player(0, 0, 1.5, PLAYER_SIZE);
 
+    initializeGame(enemyVector, ENEMY_START_COUNT, rng); 
     while(true) {
         player.update();
-        enemy.update(player);
 
+        bool player_hit = false; 
+
+        for (Enemy& e : enemyVector) {
+            if (e.update(player)) {
+                player_hit = true; 
+            }
+        }
+        
         // Reset the current score and player position if the player collides with enemy
-        if(enemy.bounding_box.intersects(player.bounding_box)) {
+        if (player_hit) {
             scoreDisplay.resetScore();
-            player.sprite.set_x(44);
-            player.sprite.set_y(22);
-
-            int new_x = rng.get_int(MIN_X, MAX_X);
-            int new_y = rng.get_int(MIN_Y, MAX_Y);
-            enemy.sprite.set_x(new_x);
-            enemy.sprite.set_y(new_y);
+            player.reset(0, 0); 
+            
+            initializeGame(enemyVector, ENEMY_START_COUNT, rng); 
         }
 
         // Update the scores and disaply them
         scoreDisplay.update();
-        
-
         bn::core::update();
     }
 }

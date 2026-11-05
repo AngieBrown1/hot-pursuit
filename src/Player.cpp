@@ -1,7 +1,7 @@
 
 
 #include "Player.h"
-#include "Box.h"
+#include "functions.h"
  
     Player::Player(bn::fixed x_start, bn::fixed y_start, bn::fixed player_speed, bn::size player_size):
         sprite(bn::sprite_items::happy.create_sprite(x_start, y_start)), 

@@ -1,5 +1,5 @@
 #pragma once
-
+#include "functions.h"
 #include "bn_sprite_items_angry.h"
 #include "Player.h"
 class Enemy {

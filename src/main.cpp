@@ -12,6 +12,8 @@
 #include "common_fixed_8x16_font.h"
 #include "bn_sprite_items_dot.h"
 #include "bn_sprite_items_square.h"
+#include "bn_sprite_items_happy.h"
+#include "bn_sprite_items_angry.h"
 
 // Width and height of the the player bounding box
 static constexpr bn::fixed BASE_SPEED = 2; 
@@ -114,7 +116,7 @@ class Player {
         bn::size size; 
 
         Player(bn::fixed x_start, bn::fixed y_start, bn::fixed player_speed, bn::size player_size):
-        sprite(bn::sprite_items::dot.create_sprite(x_start, y_start)), 
+        sprite(bn::sprite_items::happy.create_sprite(x_start, y_start)), 
         speed(player_speed),
         size(player_size) {
 

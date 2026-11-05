@@ -10,11 +10,14 @@
 
 
 #include "ScoreDisplay.h"
+#include "Player.h"
+#include "Enemy.h"
 #include "common_fixed_8x16_font.h"
 #include "bn_sprite_items_dot.h"
 #include "bn_sprite_items_square.h"
 #include "bn_sprite_items_happy.h"
 #include "bn_sprite_items_angry.h"
+
 
 // Width and height of the the player bounding box
 static constexpr bn::fixed BASE_SPEED = 2; 
@@ -35,133 +38,67 @@ static constexpr int MAX_ENEMY_COUNT = 10;
  * sprite the sprite to center the box around
  * box_size the dimensions of the bounding box
  */
-bn::rect create_bounding_box(bn::sprite_ptr sprite, bn::size box_size) {
-    return bn::rect(sprite.x().round_integer(),
-                    sprite.y().round_integer(),
-                    box_size.width(),
-                    box_size.height());
-}
+// bn::rect create_bounding_box(bn::sprite_ptr sprite, bn::size box_size) {
+//     return bn::rect(sprite.x().round_integer(),
+//                     sprite.y().round_integer(),
+//                     box_size.width(),
+//                     box_size.height());
+// }
 
 
-class Player {
-    public:
 
-        bn::sprite_ptr sprite;
-        bn::fixed speed; // The speed of the player
-        bn::rect bounding_box;
-        bn::size size; 
+// class Enemy {
+//     public:
+//         bn::sprite_ptr sprite; 
+//         bn::rect bounding_box;
+//         bn::fixed enemy_speed = 0.5;
+//         bn::size size; 
 
-        Player(bn::fixed x_start, bn::fixed y_start, bn::fixed player_speed, bn::size player_size):
-        sprite(bn::sprite_items::happy.create_sprite(x_start, y_start)), 
-        speed(player_speed),
-        size(player_size) {
+//         Enemy(bn::fixed x_start, bn::fixed y_start, bn::size enemy_size):
+//         sprite(bn::sprite_items::angry.create_sprite(x_start, y_start)),
+//         size(enemy_size) {}
 
-        }
-        /**
-         * Update the position and bounding box of the player based on d-pad movement.
-         */
-        void update() {
-            if(bn::keypad::right_held()) {
-                sprite.set_x(sprite.x() + speed);
-            }
-            if(bn::keypad::left_held()) {
-                sprite.set_x(sprite.x() - speed);
-            }
-            // TODO: Add logic for up and down
-            if(bn::keypad::up_held()) {
-                sprite.set_y(sprite.y() - speed);
-            }
-            if(bn::keypad::down_held()) {
-                sprite.set_y(sprite.y() + speed);
-            }
+//         //start of logic for enemy chase        
+//         int get_distance(const Player& player) const {
+//             int dx = bn::abs(player.get_x() - sprite.x()).round_integer();
+//             int dy = bn::abs(player.get_y() - sprite.y()).round_integer();
 
-             if(sprite.x() > MAX_X) {
-                sprite.set_x(MAX_X);
-            }
+//             int max_dist = std::max(dx, dy); 
+//             int min_dist = std::min(dx, dy); 
 
-            if(sprite.x() < MIN_X){
-                sprite.set_x(MIN_X);
-            }
+//             int dist = max_dist + (min_dist >> 2);
 
-            if(sprite.y() > MAX_Y) {
-                sprite.set_y(MAX_Y);
-            }
-
-            if(sprite.y() < MIN_Y){
-                sprite.set_y(MIN_Y);
-            }
-
-            bounding_box = create_bounding_box(sprite, size);
-        }
-
-        void reset(bn::fixed start_x, bn::fixed start_y) {
-            sprite.set_x(start_x); 
-            sprite.set_y(start_y); 
-        }
-
-        void update_speed() {
-            speed = speed - 0.1; 
-        }
-
-        // Create the sprite. This will be moved to a constructor
-         // The rectangle around the sprite for checking collision
-
-    bn::fixed get_x() const { return sprite.x(); }
-    bn::fixed get_y() const { return sprite.y(); } 
-};
-
-class Enemy {
-    public:
-        bn::sprite_ptr sprite; 
-        bn::rect bounding_box;
-        bn::fixed enemy_speed = 0.5;
-        bn::size size; 
-
-        Enemy(bn::fixed x_start, bn::fixed y_start, bn::size enemy_size):
-        sprite(bn::sprite_items::angry.create_sprite(x_start, y_start)),
-        size(enemy_size) {}
-
-        //start of logic for enemy chase        
-        int get_distance(const Player& player) const {
-            int dx = bn::abs(player.get_x() - sprite.x()).round_integer();
-            int dy = bn::abs(player.get_y() - sprite.y()).round_integer();
-
-            int max_dist = std::max(dx, dy); 
-            int min_dist = std::min(dx, dy); 
-
-            int dist = max_dist + (min_dist >> 2);
-
-            return dist; 
-        }
+//             return dist; 
+//         }
 
   
 
-        bool update(Player& player){
-            bn::fixed move_x = 0;
-            bn::fixed move_y = 0; 
+//         bool update(Player& player){
+//             bn::fixed move_x = 0;
+//             bn::fixed move_y = 0; 
 
-            int dist_to_player = get_distance(player); 
-            //the part that broke
-            if(dist_to_player > 0){
-                if (player.get_x() > sprite.x()) { move_x += enemy_speed; }
-                if (player.get_x() < sprite.x()) { move_x -= enemy_speed; }
-                if (player.get_y() > sprite.y()) { move_y += enemy_speed; }
-                if (player.get_y() < sprite.y()) { move_y -= enemy_speed; }
-            }
-            sprite.set_x(sprite.x() + move_x);
-            sprite.set_y(sprite.y() + move_y);
+//             int dist_to_player = get_distance(player); 
+//             //the part that broke
+//             if(dist_to_player > 0){
+//                 if (player.get_x() > sprite.x()) { move_x += enemy_speed; }
+//                 if (player.get_x() < sprite.x()) { move_x -= enemy_speed; }
+//                 if (player.get_y() > sprite.y()) { move_y += enemy_speed; }
+//                 if (player.get_y() < sprite.y()) { move_y -= enemy_speed; }
+//             }
+//             sprite.set_x(sprite.x() + move_x);
+//             sprite.set_y(sprite.y() + move_y);
 
-            //trying to update enemy bounding box
-            bounding_box = create_bounding_box(sprite, size);
+//             //trying to update enemy bounding box
+//             bounding_box = create_bounding_box(sprite, size);
 
-            return bounding_box.intersects(player.bounding_box); 
-        }
+//             return bounding_box.intersects(player.bounding_box); 
+//         }
 
-        void reset(bn::fixed start_x, bn::fixed start_y) {
-            sprite.set_x(start_x); 
-            sprite.set_y(start_y); 
-        }
-};
+//         void reset(bn::fixed start_x, bn::fixed start_y) {
+//             sprite.set_x(start_x); 
+//             sprite.set_y(start_y); 
+//         }
+// };
 
 void addEnemy(bn::vector<Enemy, MAX_ENEMY_COUNT>& enemies, bn::fixed start_x, bn::fixed start_y) {
     if (enemies.size() < enemies.max_size()) {

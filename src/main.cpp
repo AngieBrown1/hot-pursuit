@@ -34,7 +34,7 @@ static constexpr int HIGH_SCORE_X = -70;
 static constexpr int HIGH_SCORE_Y = -70;
 
 // Max Enemy Count
-static constexpr int ENEMY_START_COUNT = 5;
+static constexpr int ENEMY_START_COUNT = 2;
 static constexpr int MAX_ENEMY_COUNT = 10;
 
 /**
@@ -122,9 +122,6 @@ class Player {
          * Update the position and bounding box of the player based on d-pad movement.
          */
         void update() {
-            bn::fixed x = sprite.x();
-            bn::fixed y = sprite.y();
-
             if(bn::keypad::right_held()) {
                 sprite.set_x(sprite.x() + speed);
             }
@@ -143,15 +140,15 @@ class Player {
                 sprite.set_x(MAX_X);
             }
 
-            if(x < MIN_X){
+            if(sprite.x() < MIN_X){
                 sprite.set_x(MIN_X);
             }
 
-            if(y > MAX_Y) {
+            if(sprite.y() > MAX_Y) {
                 sprite.set_y(MAX_Y);
             }
 
-            if(y < MIN_Y){
+            if(sprite.y() < MIN_Y){
                 sprite.set_y(MIN_Y);
             }
 
@@ -161,6 +158,10 @@ class Player {
         void reset(bn::fixed start_x, bn::fixed start_y) {
             sprite.set_x(start_x); 
             sprite.set_y(start_y); 
+        }
+
+        void update_speed() {
+            speed = speed - 0.1; 
         }
 
         // Create the sprite. This will be moved to a constructor
@@ -243,8 +244,8 @@ void initializeGame(bn::vector<Enemy, MAX_ENEMY_COUNT>& enemies, int enemy_start
         bool inside_box = true; 
 
         while (inside_box) {
-            random_x = (random_generator.get_fixed() * MAX_X * 2) - MAX_X;
-            random_y = (random_generator.get_fixed() * MAX_Y * 2) - MAX_Y;
+            random_x = random_generator.get_fixed(MIN_X, MAX_X);
+            random_y = random_generator.get_fixed(MIN_Y, MAX_Y);
             
             if (random_x >= box_left && random_x <= box_right && 
                 random_y >= box_top && random_y <= box_bottom) {
@@ -270,6 +271,7 @@ int main() {
     // Create a player and initialize it
     // TODO: we will move the initialization logic to a constructor.
     Player player = Player(0, 0, 1.5, PLAYER_SIZE);
+    int timer{420};
 
     initializeGame(enemyVector, ENEMY_START_COUNT, rng); 
     while(true) {
@@ -291,7 +293,13 @@ int main() {
             initializeGame(enemyVector, ENEMY_START_COUNT, rng); 
         }
 
+        if (timer <= 0) {
+            addEnemy(enemyVector, -100, -100);
+            timer = 420; 
+        }
+
         // Update the scores and disaply them
+        timer--; 
         scoreDisplay.update();
         bn::core::update();
     }

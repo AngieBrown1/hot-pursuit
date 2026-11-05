@@ -26,16 +26,21 @@ static constexpr int MAX_X = bn::display::width() / 2;
         bn::fixed speed; // The speed of the player
         bn::rect bounding_box;
         bn::size size; 
+        int boost_duration{180}; 
+        int cooldown{300};
+        bool boosted = false;
 
         Player(bn::fixed x_start, bn::fixed y_start, bn::fixed player_speed, bn::size player_size);
         /**
          * Update the position and bounding box of the player based on d-pad movement.
          */
         void update();
+        void activate_boost(); 
+        void update_boost(); 
 
         void reset(bn::fixed start_x, bn::fixed start_y); 
 
-        void update_speed(); 
+        void update_speed(bn::fixed new_speed); 
 
         // Create the sprite. This will be moved to a constructor
          // The rectangle around the sprite for checking collision
